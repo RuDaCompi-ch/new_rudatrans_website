@@ -14,27 +14,9 @@ error_reporting(E_ALL);
 header('Content-Type: application/json; charset=utf-8');
 
 // Datenbank-Zugangsdaten (Standard für XAMPP)
-$host = '127.0.0.1'; // oder 'localhost'
-$db   = 'mod_downloads';
-$user = 'root';
-$pass = ''; // Standardmäßig ist das Passwort in XAMPP leer
-$charset = 'utf8mb4';
-
-// Data Source Name (DSN) für PDO zusammenbauen
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-
-// Optionen für PDO (Datenbank-Bibliothek in PHP)
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Wirf Exceptions bei Fehlern
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,       // Ergebnisse als assoziative Arrays zurückgeben
-    PDO::ATTR_EMULATE_PREPARES   => false,                  // Native Prepared Statements nutzen
-];
+require_once 'db_config.php';
 
 try {
-    // 1. Verbindung zur Datenbank herstellen
-    $pdo = new PDO($dsn, $user, $pass, $options);
-
-    // 2. Alle Mods abfragen
     $stmt = $pdo->query("SELECT * FROM mods ORDER BY id ASC");
     $mods = $stmt->fetchAll();
 

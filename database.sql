@@ -5,6 +5,41 @@ USE mod_downloads;
 -- Lösche bestehende Tabellen, um Konflikte bei erneutem Import zu vermeiden
 DROP TABLE IF EXISTS mod_images;
 DROP TABLE IF EXISTS mods;
+DROP TABLE IF EXISTS invites;
+DROP TABLE IF EXISTS users;
+
+-- ==========================================
+-- Tabelle: users
+-- Speichert Administratoren und den Owner
+-- ==========================================
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'admin', -- 'owner' oder 'admin'
+    is_verified TINYINT(1) DEFAULT 0,
+    verification_token VARCHAR(255) NULL,
+    reset_token VARCHAR(255) NULL,
+    reset_expires DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- Tabelle: invites
+-- Einladungen für neue Admins (nur Owner darf erstellen)
+-- ==========================================
+CREATE TABLE invites (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    used TINYINT(1) DEFAULT 0,
+    created_by INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Owner Account anlegen (Passwort ist 'owner123', verschlüsselt mit BCRYPT)
+INSERT INTO users (email, password_hash, role, is_verified) 
+VALUES ('rudacompi@gmail.com', '$2y$10$F9vt9KGJKaHbKM2uN.2u/.NbribOP2LO5SiELgWUIBbM.WRVacay6', 'owner', 1);
 
 -- ==========================================
 -- Tabelle: mods

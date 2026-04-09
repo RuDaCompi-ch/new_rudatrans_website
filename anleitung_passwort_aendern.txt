@@ -1,0 +1,33 @@
+========================================================================
+WIE ÄNDERE ICH DAS PASSWORT VOM OWNER-ACCOUNT (rudacompi@gmail.com)?
+========================================================================
+
+Aktuell lautet das Passwort: owner123
+Es gibt zwei einfache Methoden, um dieses Passwort später auf dein eigenes, sicheres Wunsch-Passwort zu ändern:
+
+--- METHODE 1: Über das Backend ("Passwort vergessen") - SEHR EINFACH ---
+Diese Methode funktioniert, sobald du deine echten Mail-Daten in "admin/mail_config.php" eingetragen hast:
+1. Gehe in deinem Browser auf die Login-Seite: http://localhost/admin/login.php
+2. Klicke unten auf den Link "Passwort vergessen?".
+3. Gib deine Mail "rudacompi@gmail.com" ein.
+4. Du erhältst einen Link per E-Mail, über den du ganz bequem auf der Webseite ein neues Passwort eintippen kannst. Das System verschlüsselt es dabei automatisch sicher für dich!
+
+--- METHODE 2: Manuell über phpMyAdmin (Für Entwickler) ---
+Falls du es sofort ändern willst, ohne auf E-Mails zu warten:
+Da Passwörter in der Datenbank sicher verschlüsselt (mit BCRYPT) gespeichert werden, kannst du nicht einfach dein Klartext-Passwort in die Tabelle tippen. Du musst es vorher verschlüsseln.
+
+Schritt 1: Passwort verschlüsseln
+1. Gehe auf eine Webseite wie: https://bcrypt-generator.com/
+2. Tippe unter "String to hash" dein neues Wunsch-Passwort ein (z.B. "MeinTollesPasswort12!").
+3. Klicke auf den Button "Hash".
+4. Kopiere dir den erzeugten Code (er fängt meist mit "$2y$10..." an).
+
+Schritt 2: In die Datenbank eintragen
+1. Öffne phpMyAdmin via XAMPP (z.B. http://localhost/phpmyadmin).
+2. Klicke links auf deine Datenbank "mod_downloads".
+3. Klicke auf die Tabelle "users".
+4. Beim Eintrag für "rudacompi@gmail.com" klickst du links auf "Bearbeiten".
+5. Lösche den alten Text im Feld "password_hash" und füge deinen eben kopierten langen Hash-Code ein.
+6. Klicke unten auf "Speichern" (Gimmick). 
+
+Fertig! Du kannst dich jetzt sofort mit deinem neuen Passwort auf http://localhost/admin/login.php anmelden.
