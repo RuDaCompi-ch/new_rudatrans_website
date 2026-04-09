@@ -78,13 +78,12 @@ function renderModGrid(mods) {
         const imgElement = card.querySelector(`#card-img-${mod.id}`);
         const ribbonEl = card.querySelector(`#grid-ribbon-${mod.id}`);
         
-        // Initial Banner Status
-        updateRibbon(ribbonEl, cardState.images[0].badge);
+        // Ribbon fest an die Karte heften basierend auf dem Mod-Status
+        updateRibbon(ribbonEl, mod.status);
 
         let autoRotateInterval = setInterval(() => {
             cardState.currentImageIndex = (cardState.currentImageIndex + 1) % cardState.images.length;
             imgElement.src = cardState.images[cardState.currentImageIndex].image_url;
-            updateRibbon(ribbonEl, cardState.images[cardState.currentImageIndex].badge);
         }, 5000);
 
         imgElement.addEventListener('click', () => openModal(mod));
@@ -106,9 +105,24 @@ function openModal(mod) {
     document.getElementById('modal-description').innerHTML = mod.description;
     document.getElementById('modal-download-btn').href = mod.download_url;
 
-    // Der alte modale Status Button wird versteckt, da Badges jetzt objektbezogen in der Bildecke sind
+    // Der alte modale Status Button wird versteckt, da Badges jetzt als Overlay in der Bildecke sind
     const statusBtn = document.getElementById('modal-status-btn');
     if (statusBtn) statusBtn.style.display = 'none';
+
+    // Das Banner fest im Modal verankern (statisches Overlay für das Hauptbild des Mods)
+    let ribbonEl = document.getElementById('modal-ribbon');
+    if (!ribbonEl) {
+        const cContainer = document.querySelector('.carousel-main-image-container');
+        cContainer.style.position = 'relative'; 
+        cContainer.style.overflow = 'hidden';
+        
+        ribbonEl = document.createElement('div');
+        ribbonEl.id = 'modal-ribbon';
+        ribbonEl.className = 'badge-ribbon';
+        ribbonEl.style.display = 'none';
+        cContainer.appendChild(ribbonEl);
+    }
+    updateRibbon(ribbonEl, mod.status);
 
     modalState.images = mod.images;
     modalState.currentIndex = 0;
@@ -122,21 +136,6 @@ function closeModal() { document.getElementById('mod-modal').classList.remove('a
 function renderModalCarousel() {
     const mainImg = document.getElementById('modal-main-image');
     mainImg.src = modalState.images[modalState.currentIndex].image_url;
-
-    // Update Ribbon am großen Bild im Modal
-    let ribbonEl = document.getElementById('modal-ribbon');
-    if (!ribbonEl) {
-        const cContainer = document.querySelector('.carousel-main-image-container');
-        cContainer.style.position = 'relative'; // Wichtig fürs Ribbon Placement
-        cContainer.style.overflow = 'hidden';
-        
-        ribbonEl = document.createElement('div');
-        ribbonEl.id = 'modal-ribbon';
-        ribbonEl.className = 'badge-ribbon';
-        ribbonEl.style.display = 'none';
-        cContainer.appendChild(ribbonEl);
-    }
-    updateRibbon(ribbonEl, modalState.images[modalState.currentIndex].badge);
 
     const thumbsContainer = document.getElementById('modal-thumbnails');
     const total = modalState.images.length;

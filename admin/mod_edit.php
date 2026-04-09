@@ -41,10 +41,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($id) {
             $sql = "UPDATE mods SET 
                 title=?, version=?, version_date=?, ets2_compat=?, mod_type=?, 
-                mod_kind=?, filename=?, note=?, description=?, download_url=?, status=? 
+                mod_kind=?, filename=?, note=?, description=?, download_url=?, status=?, status_updated_at=IF(status != ?, NOW(), status_updated_at)
                 WHERE id=?";
             $stmt = $pdo->prepare($sql);
-            if ($stmt->execute([$title, $version, $version_date, $ets2_compat, $mod_type, $mod_kind, $filename, $note, $_description, $download_url, $status, $id])) {
+            if ($stmt->execute([$title, $version, $version_date, $ets2_compat, $mod_type, $mod_kind, $filename, $note, $_description, $download_url, $status, $status, $id])) {
                 $success = "Mod erfolgreich aktualisiert!";
                 $mod = array_merge($mod, $_POST); // Update form variables
             } else {
@@ -52,8 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             $sql = "INSERT INTO mods 
-                (title, version, version_date, ets2_compat, mod_type, mod_kind, filename, note, description, download_url, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                (title, version, version_date, ets2_compat, mod_type, mod_kind, filename, note, description, download_url, status, status_updated_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
             $stmt = $pdo->prepare($sql);
             if ($stmt->execute([$title, $version, $version_date, $ets2_compat, $mod_type, $mod_kind, $filename, $note, $_description, $download_url, $status])) {
                 $id = $pdo->lastInsertId();

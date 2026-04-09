@@ -22,15 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         echo json_encode(['status' => 'success']);
         exit();
     }
-    
-    if ($_POST['action'] === 'update_badge' && isset($_POST['img_id']) && isset($_POST['badge'])) {
-        $badge = $_POST['badge']; // 'NEW', 'UPDATE', oder ''
-        $img_id = (int)$_POST['img_id'];
-        $pdo->prepare("UPDATE mod_images SET badge = ? WHERE id = ? AND mod_id = ?")
-            ->execute([$badge, $img_id, $mod_id]);
-        echo json_encode(['status' => 'success']);
-        exit();
-    }
 }
 
 // Delete logic
@@ -53,43 +44,86 @@ if (isset($_GET['delete'])) {
 
 // Upload logic
 $message = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file']) && !isset($_POST['action'])) {
-    $file = $_FILES['file'];
-    if ($file['error'] === UPLOAD_ERR_OK) {
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        $valid_exts = ['jpg', 'jpeg', 'png', 'webp'];
-        
-        if (in_array($ext, $valid_exts)) {
-            $filename = uniqid('mod_' . $mod_id . '_') . '.webp';
-            $upload_dir = __DIR__ . '/../uploads/';
-            if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
-            $dest_path = $upload_dir . $filename;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['files']) && !isset($_POST['action'])) {
+    $files = $_FILES['files'];
+    $successCount = 0;
+    $errorCount = 0;
+    $errorMessages = [];
+    
+    $totalFiles = count($files['name']);
+    for ($i = 0; $i < $totalFiles; $i++) {
+        if ($files['error'][$i] === UPLOAD_ERR_OK) {
+            $ext = strtolower(pathinfo($files['name'][$i], PATHINFO_EXTENSION));
+            $valid_exts = ['jpg', 'jpeg', 'png', 'webp'];
             
-            $imgResource = null;
-            if ($ext === 'jpg' || $ext === 'jpeg') { $imgResource = @imagecreatefromjpeg($file['tmp_name']); }
-            elseif ($ext === 'png') {
-                $imgResource = @imagecreatefrompng($file['tmp_name']);
-                imagepalettetotruecolor($imgResource);
-                imagealphablending($imgResource, true);
-                imagesavealpha($imgResource, true);
-            } elseif ($ext === 'webp') { $imgResource = @imagecreatefromwebp($file['tmp_name']); }
-
-            if ($imgResource) {
-                imagewebp($imgResource, $dest_path, 80);
-                imagedestroy($imgResource);
+            if (in_array($ext, $valid_exts)) {
+                $filename_base = uniqid('mod_' . $mod_id . '_');
+                $upload_dir = __DIR__ . '/../uploads/';
+                if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
                 
-                // Neue Bilder immer ans Ende hängen (hohe Sort Order)
-                $db_url = 'uploads/' . $filename;
-                $pdo->prepare("INSERT INTO mod_images (mod_id, image_url, sort_order) VALUES (?, ?, 999)")->execute([$mod_id, $db_url]);
-                $message = "<div class='alert alert-success'>Bild erfolgreich hochgeladen und konvertiert!</div>";
+                $supports_webp = function_exists('imagewebp') && function_exists('imagecreatefromwebp');
+
+                if ($supports_webp) {
+                    $filename = $filename_base . '.webp';
+                    $dest_path = $upload_dir . $filename;
+                    
+                    $imgResource = null;
+                    if ($ext === 'jpg' || $ext === 'jpeg') { $imgResource = @imagecreatefromjpeg($files['tmp_name'][$i]); }
+                    elseif ($ext === 'png') {
+                        $imgResource = @imagecreatefrompng($files['tmp_name'][$i]);
+                        imagepalettetotruecolor($imgResource);
+                        imagealphablending($imgResource, true);
+                        imagesavealpha($imgResource, true);
+                    } elseif ($ext === 'webp') { 
+                        $imgResource = @imagecreatefromwebp($files['tmp_name'][$i]); 
+                    }
+
+                    if ($imgResource) {
+                        imagewebp($imgResource, $dest_path, 80);
+                        imagedestroy($imgResource);
+                        
+                        $db_url = 'uploads/' . $filename;
+                        $pdo->prepare("INSERT INTO mod_images (mod_id, image_url, sort_order) VALUES (?, ?, 999)")->execute([$mod_id, $db_url]);
+                        $successCount++;
+                    } else {
+                        if (move_uploaded_file($files['tmp_name'][$i], $upload_dir . $filename_base . '.' . $ext)) {
+                            $db_url = 'uploads/' . $filename_base . '.' . $ext;
+                            $pdo->prepare("INSERT INTO mod_images (mod_id, image_url, sort_order) VALUES (?, ?, 999)")->execute([$mod_id, $db_url]);
+                            $successCount++;
+                        } else {
+                            $errorCount++;
+                            $errorMessages[] = "Fehler beim Verarbeiten von: " . htmlspecialchars($files['name'][$i]);
+                        }
+                    }
+                } else {
+                    // FALLBACK: NO WEBP SUPPORT IN LOCAL SERVER GD
+                    $filename = $filename_base . '.' . $ext;
+                    if (move_uploaded_file($files['tmp_name'][$i], $upload_dir . $filename)) {
+                        $db_url = 'uploads/' . $filename;
+                        $pdo->prepare("INSERT INTO mod_images (mod_id, image_url, sort_order) VALUES (?, ?, 999)")->execute([$mod_id, $db_url]);
+                        $successCount++;
+                    } else {
+                        $errorCount++;
+                        $errorMessages[] = "Speicherfehler bei: " . htmlspecialchars($files['name'][$i]);
+                    }
+                }
             } else {
-                $message = "<div class='alert alert-danger'>Fehler beim Verarbeiten.</div>";
+                $errorCount++;
+                $errorMessages[] = "Ungültiges Format bei: " . htmlspecialchars($files['name'][$i]);
             }
-        } else {
-            $message = "<div class='alert alert-danger'>Ungültiges Format. Erlaubt sind JPG, PNG und WEBP.</div>";
+        } elseif ($files['error'][$i] !== UPLOAD_ERR_NO_FILE) {
+            $errorCount++;
+            $errorMessages[] = "Upload-Fehler (Code {$files['error'][$i]}) bei: " . htmlspecialchars($files['name'][$i]);
         }
-    } else {
-        $message = "<div class='alert alert-danger'>Upload-Fehler! (Code: {$file['error']})</div>";
+    }
+    
+    // Statusmeldungen zusammenstellen
+    if ($successCount > 0 && $errorCount == 0) {
+        $message = "<div class='alert alert-success'>$successCount Bilder erfolgreich hochgeladen!</div>";
+    } elseif ($successCount > 0 && $errorCount > 0) {
+        $message = "<div class='alert alert-warning'>$successCount Bilder hochgeladen, aber $errorCount Fehler:<br><small>" . implode("<br>", $errorMessages) . "</small></div>";
+    } elseif ($errorCount > 0) {
+        $message = "<div class='alert alert-danger'>Keine Bilder hochgeladen. Fehler:<br><small>" . implode("<br>", $errorMessages) . "</small></div>";
     }
 }
 
@@ -112,8 +146,8 @@ $images = $imgsQuery->fetchAll();
 
     <div style="margin-top: 20px; background: #eee; padding: 20px; border-radius: 5px;">
         <form method="POST" enctype="multipart/form-data" style="display: flex; gap: 10px; align-items: center;">
-            <input type="file" name="file" accept="image/png, image/jpeg, image/webp" required class="form-control" style="max-width: 300px;">
-            <button type="submit" class="btn btn-success">Bild Hochladen (wird .webp)</button>
+            <input type="file" name="files[]" accept="image/png, image/jpeg, image/webp" multiple required class="form-control" style="max-width: 350px;">
+            <button type="submit" class="btn btn-success">Bilder Hochladen</button>
         </form>
     </div>
 
@@ -130,16 +164,7 @@ $images = $imgsQuery->fetchAll();
                     $imgSrc = (strpos($img['image_url'], 'http') === 0) ? $img['image_url'] : '../' . $img['image_url'];
                 ?>
                 
-                <!-- Badge Select Form -->
-                <div style="margin-bottom: 8px;">
-                    <select class="form-control badge-selector" style="padding: 4px; font-size: 0.8rem;" data-id="<?php echo $img['id']; ?>">
-                        <option value="" <?php if($img['badge']==='') echo 'selected'; ?>>- Kein Banner -</option>
-                        <option value="NEW" <?php if($img['badge']==='NEW') echo 'selected'; ?>>🌟 NEW</option>
-                        <option value="UPDATE" <?php if($img['badge']==='UPDATE') echo 'selected'; ?>>🔄 UPDATE</option>
-                    </select>
-                </div>
-                
-                <img src="<?php echo htmlspecialchars($imgSrc); ?>" alt="Mod Image" style="pointer-events: none;">
+                <img src="<?php echo htmlspecialchars($imgSrc); ?>" alt="Mod Image" style="pointer-events: none; margin-bottom: 8px;">
                 <a href="fotos.php?id=<?php echo $mod_id; ?>&delete=<?php echo $img['id']; ?>" class="btn btn-danger" style="display: block; width: 100%; box-sizing: border-box; text-align: center; font-size: 0.8rem; padding: 5px;" onclick="return confirm('Möchtest du dieses Bild löschen?');">Löschen</a>
             </div>
         <?php endforeach; ?>
@@ -184,29 +209,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // 2. Initialisiere Badge Select Änderungen
-    document.querySelectorAll('.badge-selector').forEach(select => {
-        select.addEventListener('change', function() {
-            let imgId = this.getAttribute('data-id');
-            let badgeVal = this.value;
-
-            let formData = new FormData();
-            formData.append('action', 'update_badge');
-            formData.append('img_id', imgId);
-            formData.append('badge', badgeVal);
-
-            fetch('fotos.php?id=<?php echo $mod_id; ?>', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Kurzes visuelles Feedback (z.B. grüner Rand)
-                this.style.border = "2px solid green";
-                setTimeout(() => { this.style.border = "1px solid #ccc"; }, 1000);
-            });
-        });
-    });
+    // (Badge Selector logic removed)
 });
 </script>
 

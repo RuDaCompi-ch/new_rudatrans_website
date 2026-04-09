@@ -195,27 +195,30 @@ body {
     position: absolute;
     top: 0;
     right: 0;
-    padding: 7px 30px;
+    padding: 4px 15px; /* Die Hälfte vom vorherigen "Rand" */
     font-size: 0.95rem;
     font-weight: 800;
     font-family: inherit;
     text-transform: uppercase;
     color: #fff;
-    box-shadow: -3px 3px 15px rgba(0,0,0,0.6);
+    box-shadow: -2px 2px 10px rgba(0,0,0,0.4);
     z-index: 50; /* Über den Bildern */
     pointer-events: none; /* Klick geht durchs Banner durch! */
     border-bottom-left-radius: var(--radius-large);
     letter-spacing: 1px;
     transition: all 0.3s ease;
+    backdrop-filter: blur(2px); /* Sieht bei halbtransparentem Hintergrund super aus */
 }
 
 .ribbon-new { 
-    background: linear-gradient(135deg, #1fa33f, #15792d);
+    /* 35% Deckkraft für die Grüntöne */
+    background: linear-gradient(135deg, rgba(31, 163, 63, 0.35), rgba(21, 121, 45, 0.35));
 }
 
 .ribbon-update { 
-    background: linear-gradient(135deg, var(--btn-yellow), #d4a000); 
-    color: #000; /* Besserer Kontrast */
+    /* 35% Deckkraft für die Gelbtöne */
+    background: linear-gradient(135deg, rgba(250, 204, 21, 0.35), rgba(212, 160, 0, 0.35)); 
+    color: #fff; /* Wechsel auf weiß, da das halbdurchsichtige Gelb für schwarze Schrift zu dunkel ist */
 }
 
 .modal-overlay {

@@ -57,7 +57,8 @@ CREATE TABLE mods (
     note VARCHAR(255),
     description TEXT NOT NULL,
     download_url VARCHAR(255) NOT NULL,
-    status VARCHAR(20) DEFAULT '' -- Kann 'NEW', 'UPDATE' oder leer '' sein
+    status VARCHAR(20) DEFAULT '', -- Kann 'NEW', 'UPDATE' oder leer '' sein
+    status_updated_at TIMESTAMP NULL DEFAULT NULL
 );
 
 -- ==========================================
@@ -70,6 +71,7 @@ CREATE TABLE mod_images (
     image_url VARCHAR(255) NOT NULL,
     sort_order INT DEFAULT 0,
     badge VARCHAR(20) DEFAULT '',
+    badge_updated_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (mod_id) REFERENCES mods(id) ON DELETE CASCADE
 );
 
