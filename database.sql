@@ -68,6 +68,8 @@ CREATE TABLE mod_images (
     id INT AUTO_INCREMENT PRIMARY KEY,
     mod_id INT NOT NULL,
     image_url VARCHAR(255) NOT NULL,
+    sort_order INT DEFAULT 0,
+    badge VARCHAR(20) DEFAULT '',
     FOREIGN KEY (mod_id) REFERENCES mods(id) ON DELETE CASCADE
 );
 

@@ -24,20 +24,22 @@ try {
     foreach ($mods as $key => $mod) {
         $modId = $mod['id'];
         
-        // SQL-Query um alle Bilder für die aktuelle $modId zu holen
-        $imgStmt = $pdo->prepare("SELECT image_url FROM mod_images WHERE mod_id = ?");
+        // SQL-Query um alle Bilder für die aktuelle $modId zu holen sortiert nach sort_order
+        $imgStmt = $pdo->prepare("SELECT image_url, badge FROM mod_images WHERE mod_id = ? ORDER BY sort_order ASC, id ASC");
         $imgStmt->execute([$modId]);
         
-        // Bilder-URLs in ein flaches Array pressen
-        $images = $imgStmt->fetchAll(PDO::FETCH_COLUMN);
+        // Bilder-Daten als assoziatives Array holen
+        $imagesData = $imgStmt->fetchAll(PDO::FETCH_ASSOC);
         
         // Wenn keine Bilder gefunden wurden, fügen wir ein Platzhalter-Bild hinzu
-        if (empty($images)) {
-            $images = ['https://via.placeholder.com/800x600?text=Kein+Bild+vorhanden'];
+        if (empty($imagesData)) {
+            $imagesData = [
+                ['image_url' => 'https://via.placeholder.com/800x600?text=Kein+Bild+vorhanden', 'badge' => '']
+            ];
         }
 
         // Bilder dem Array-Element hinzufügen
-        $mods[$key]['images'] = $images;
+        $mods[$key]['images'] = $imagesData;
     }
 
     // 4. Das fertige Array als JSON kodieren und ausgeben
