@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Downloads</title>
+    <!-- Einbindung der Google Schriftart "Inter" für ein modernes Erscheinungsbild -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Einbindung der CSS-Datei für das Design -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Kopfzeile -->
+    <header class="main-header">
+        <h1>Downloads</h1>
+    </header>
+
+    <!-- Hauptbereich, in dem das Grid der Mod-Karten geladen wird -->
+    <main class="container">
+        <!-- Dieser Bereich wird durch JavaScript dynamisch befüllt -->
+        <div id="mod-grid" class="mod-grid">
+            <!-- Platzhalter-Ladeanzeige -->
+            <p class="loading-text">Mods werden geladen...</p>
+        </div>
+    </main>
+
+    <!-- Modal für die Detailansicht (standardmäßig unsichtbar) -->
+    <div id="mod-modal" class="modal-overlay">
+        <!-- Der Inhalt des Modals (die Rote Karte) -->
+        <div class="modal-content">
+            
+            <!-- Modal Header mit Titel und Schließen-Button -->
+            <div class="modal-header">
+                <h2 id="modal-title">Mod-Detail-Beschreibung</h2>
+                <button id="close-modal" class="close-btn">&times;</button>
+            </div>
+
+            <!-- Hauptbereich des Modals mit Karussell und Specs -->
+            <div class="modal-body">
+                
+                <!-- Linke Spalte: Bilderkarussell -->
+                <div class="modal-carousel-section">
+                    <div class="carousel-main-image-container">
+                        <button class="carousel-btn prev-btn">&lt;</button>
+                        <img id="modal-main-image" src="" alt="Mod Bild" class="main-image">
+                        <button class="carousel-btn next-btn">&gt;</button>
+                    </div>
+                    
+                    <!-- Thumbnails unterhalb des Hauptbildes -->
+                    <div class="carousel-thumbnails" id="modal-thumbnails">
+                        <!-- Thumbnails werden per JS generiert -->
+                    </div>
+                </div>
+
+                <!-- Rechte Spalte: Technische Daten (Specs) und Buttons -->
+                <div class="modal-specs-section">
+                    <div class="specs-box">
+                        <h3>Spec's:</h3>
+                        <table class="specs-table">
+                            <tr><td>Modversion:</td><td id="spec-version"></td></tr>
+                            <tr><td>Versionsdatum:</td><td id="spec-date"></td></tr>
+                            <tr><td>ETS2 Kompatibilität:</td><td id="spec-compat"></td></tr>
+                            <tr><td>Mod-Typ:</td><td id="spec-type"></td></tr>
+                            <tr><td>Mod-Art:</td><td id="spec-kind"></td></tr>
+                            <tr><td>Dateiname:</td><td id="spec-filename"></td></tr>
+                            <tr><td>Hinweis:</td><td id="spec-note"></td></tr>
+                        </table>
+                    </div>
+
+                    <!-- Buttons: UPDATE/NEW Flagge und Download Button -->
+                    <div class="modal-action-buttons">
+                        <!-- Der UPDATE Button wird per JS versteckt, falls nicht zutreffend -->
+                        <div id="modal-status-btn" class="status-indicator">UPDATE</div>
+                        <a id="modal-download-btn" href="#" class="btn btn-primary">Download</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unterer Bereich: HTML-formatierte Beschreibung -->
+            <div class="modal-description-section">
+                <h4>Beschreibung:</h4>
+                <div id="modal-description" class="description-content">
+                    <!-- HTML Text kommt von der Datenbank hier rein -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Vollbild Karussell Modal -->
+    <div id="fullscreen-modal" class="modal-overlay">
+        <button id="close-fullscreen" class="close-btn" style="color: white; z-index: 1001; right: 20px; top: 20px;">&times;</button>
+        <div class="fullscreen-carousel-container">
+            <button class="carousel-btn prev-btn" id="fs-prev" style="color: white; text-shadow: 0 0 5px black;">&lt;</button>
+            <img id="fullscreen-main-image" src="" alt="Vollbild" class="fs-main-image">
+            <button class="carousel-btn next-btn" id="fs-next" style="color: white; text-shadow: 0 0 5px black;">&gt;</button>
+            <div class="carousel-thumbnails" id="fullscreen-thumbnails">
+                <!-- Fullscreen Thumbnails per JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Einbindung der JS Datei für die Logik -->
+    <script src="script.js"></script>
+</body>
+</html>

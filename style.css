@@ -1,0 +1,449 @@
+/* ==========================================
+   Globale Variablen & Resets
+   ========================================== */
+:root {
+    --bg-dark: #1f1f1f;
+    --card-red: #8b2525;
+    --box-white: #ffffff;
+    --text-dark: #121212;
+    --btn-yellow: #facc15;
+    --radius-large: 12px;
+    --radius-small: 6px;
+    --spacing: 20px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--box-white);
+    padding: var(--spacing);
+}
+
+/* ==========================================
+   Header Bereich
+   ========================================== */
+.main-header {
+    background-color: var(--card-red);
+    padding: 24px;
+    border-radius: var(--radius-large);
+    text-align: center;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.main-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+/* ==========================================
+   Grid System (Übersicht der Mods)
+   ========================================== */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.mod-grid {
+    display: grid;
+    /* Responsive Gestaltung: mind. 300px breit, sonst passend verteilen */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.loading-text {
+    text-align: center;
+    grid-column: 1 / -1;
+    font-size: 1.2rem;
+    color: #a1a1aa;
+}
+
+/* ==========================================
+   Einzelne Mod-Karte (Grid Item)
+   ========================================== */
+.mod-card {
+    background-color: var(--card-red);
+    padding: var(--spacing);
+    border-radius: var(--radius-large);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.card-title {
+    background-color: var(--box-white);
+    color: var(--text-dark);
+    text-align: center;
+    padding: 10px;
+    border-radius: var(--radius-small);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.card-carousel {
+    background-color: var(--box-white);
+    border-radius: var(--radius-large);
+    padding: 0;
+    text-align: center;
+    position: relative;
+    height: 180px; /* Feste Höhe für Übersicht */
+    overflow: hidden;
+}
+
+.card-carousel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer; /* Klickbar für Vollbild */
+    display: block;
+}
+
+.card-carousel .carousel-controls {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; /* Klicks durchlassen (auf Bild), außer bei Buttons */
+}
+
+.card-carousel .carousel-controls > div {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    text-shadow: 0 0 5px rgba(0,0,0,0.8);
+    pointer-events: auto;
+}
+
+.card-carousel button {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    text-shadow: 0 0 6px rgba(0,0,0,1);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: auto;
+    padding: 5px;
+    transition: opacity 0.2s;
+}
+
+.card-carousel button:hover {
+    opacity: 0.8;
+}
+
+.card-prev-btn {
+    left: 5px;
+}
+
+.card-next-btn {
+    right: 5px;
+}
+
+.card-btn {
+    background-color: var(--box-white);
+    color: var(--text-dark);
+    text-align: center;
+    padding: 12px;
+    border-radius: var(--radius-small);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s;
+}
+
+.card-btn:hover {
+    background-color: #f1f1f1;
+}
+
+/* ==========================================
+   Modal Overlay (Detailansicht)
+   ========================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    
+    /* Standardmäßig versteckt */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background-color: var(--card-red);
+    border-radius: var(--radius-large);
+    padding: var(--spacing);
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Header */
+.modal-header {
+    background-color: var(--box-white);
+    color: var(--text-dark);
+    padding: 15px;
+    border-radius: var(--radius-small);
+    display: flex;
+    justify-content: center;
+    position: relative;
+    margin-bottom: var(--spacing);
+}
+
+.close-btn {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: var(--card-red);
+}
+
+/* Body: 2 Spalten Layout */
+.modal-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing);
+    margin-bottom: var(--spacing);
+}
+
+@media (max-width: 768px) {
+    .modal-body {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Linke Spalte: Karussell */
+.modal-carousel-section {
+    background-color: var(--box-white);
+    color: var(--text-dark);
+    border-radius: var(--radius-large);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+    min-height: 350px;
+}
+
+.carousel-main-image-container {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+}
+
+.carousel-main-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+}
+
+.modal-carousel-section .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    color: white;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-shadow: 0 0 6px rgba(0,0,0,1);
+    z-index: 10;
+    padding: 10px;
+}
+.modal-carousel-section .prev-btn { left: 5px; }
+.modal-carousel-section .next-btn { right: 5px; }
+
+.carousel-thumbnails {
+    position: absolute;
+    bottom: 25px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    z-index: 10;
+    /* overflow: hidden; entfernt, um das Beschneiden des Zooms zu verhindern */
+}
+
+.thumbnail-box {
+    flex-shrink: 0;
+    width: 45px;
+    height: 45px;
+    border: 2px solid rgba(255,255,255,0.7);
+    border-radius: 4px;
+    cursor: pointer;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 0 5px rgba(0,0,0,0.8);
+    transition: transform 0.5s ease, border-color 0.5s ease; /* 500ms Effekt */
+    transform-origin: center;
+}
+
+.thumbnail-box.active {
+    border-color: var(--btn-yellow); /* Aktives Bild durch Gelb hervorheben (optional, sieht edler aus) */
+    transform: scale(1.15); /* 15% größer */
+    z-index: 2; /* Hebt das größere Bild über die anderen */
+}
+
+/* Rechte Spalte: Specs & Buttons */
+.modal-specs-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
+}
+
+.specs-box {
+    background-color: var(--box-white);
+    color: var(--text-dark);
+    padding: 15px;
+    border-radius: var(--radius-large);
+    flex-grow: 1;
+}
+
+.specs-box h3 {
+    margin-bottom: 10px;
+    font-size: 1rem;
+    background-color: #d1d5db;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.specs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.specs-table td {
+    padding: 4px 0;
+}
+
+.specs-table td:first-child {
+    font-weight: 600;
+    width: 45%;
+}
+
+.modal-action-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.status-indicator {
+    background-color: var(--btn-yellow);
+    color: var(--text-dark);
+    padding: 10px 20px;
+    border-radius: var(--radius-small);
+    font-weight: bold;
+    text-align: center;
+    flex: 1;
+    display: none; /* Standardmäßig ausgeblendet, JS zeigt es an wenn nötig */
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background-color: var(--box-white);
+    color: var(--text-dark);
+    padding: 10px 20px;
+    border-radius: var(--radius-small);
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Beschreibung Section */
+.modal-description-section {
+    background-color: var(--box-white);
+    color: var(--text-dark);
+    padding: var(--spacing);
+    border-radius: var(--radius-large);
+}
+
+.modal-description-section h4 {
+    margin-bottom: 10px;
+}
+
+.description-content {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.description-content h3 { margin: 10px 0; font-size: 1.1rem; }
+.description-content p { margin-bottom: 10px; }
+.description-content ul { margin-left: 20px; margin-bottom: 10px; }
+
+/* ==========================================
+   Fullscreen Modal (Vollbild)
+   ========================================== */
+#fullscreen-modal {
+    background-color: rgba(0,0,0,1); /* 100% Deckkraft schwarz */
+}
+
+#fullscreen-thumbnails {
+    position: fixed;
+    bottom: 30px;
+    left: 0;
+    width: 100%;
+}
+
+.fullscreen-carousel-container {
+    position: relative;
+    width: 90vw;
+    height: 90vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fs-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.fullscreen-carousel-container .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 3rem;
+    padding: 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+.fullscreen-carousel-container .prev-btn { left: 0; }
+.fullscreen-carousel-container .next-btn { right: 0; }
+
